@@ -5,6 +5,14 @@ by a Cartesian product of a vector of `N` `Interval`s.
 """
 struct IntervalBox{N,T}
     v::SVector{N, Interval{T}}
+
+    function IntervalBox{N,T}(v::SVector{N, Interval{T}}) where {N,T}
+        if any(isempty_interval, v)
+            return new{N,T}(emptyinterval.(v))
+        else
+            return new{N,T}(v)
+        end
+    end
 end
 
 # IntervalBox(x::Interval) = IntervalBox( SVector(x) )  # single interval treated as tuple with one element
