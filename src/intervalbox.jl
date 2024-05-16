@@ -7,22 +7,24 @@ struct IntervalBox{N,T}
     v::SVector{N, Interval{T}}
 
     function IntervalBox{N,T}(v::SVector{N, Interval{T}}) where {N,T}
-        if any(isempty_interval, v)
-            return new{N,T}(emptyinterval.(v))
+        if any(isempty_interval, v.data)
+            return new{N,T}(SVector{N, Interval{T}}(ntuple(i -> emptyinterval(T), Val{N})))
         else
             return new{N,T}(v)
         end
     end
 end
 
-# IntervalBox(x::Interval) = IntervalBox( SVector(x) )  # single interval treated as tuple with one element
+IntervalBox(v::SVector{N, Interval{T}}) where {N,T} = IntervalBox{N,T}(v)
+
+IntervalBox(x::Interval) = IntervalBox( SVector(x) )  # single interval treated as tuple with one element
 
 IntervalBox(x::Interval...) = IntervalBox(SVector(x))
 IntervalBox(x::SVector) = IntervalBox(interval.(x))
 IntervalBox(x::Tuple) = IntervalBox(SVector(x))
 IntervalBox(x::Real) = IntervalBox(interval.(x))
-IntervalBox(x...) = IntervalBox(x)
-IntervalBox(x) = IntervalBox(x...)
+# IntervalBox(x...) = IntervalBox(x)
+# IntervalBox(x) = IntervalBox(x...)
 IntervalBox(X::IntervalBox, n) = foldl(×, Iterators.repeated(X, n))
 
 # construct from two vectors giving bottom and top corners:
