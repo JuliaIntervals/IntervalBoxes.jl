@@ -1,19 +1,6 @@
 
 const where_bisect = 0.49609375
 
-"""
-    bisect(X::Interval, α=0.49609375)
-
-Split the interval `X` at position α; α=0.5 corresponds to the midpoint.
-Returns a tuple of the new intervals.
-"""
-function bisect(X::Interval, α=where_bisect)
-    @assert 0 ≤ α ≤ 1
-
-    m = mid(X, α)
-
-    return (Interval(X.lo, m), Interval(m, X.hi))
-end
 
 """
     bisect(X::IntervalBox, α=0.49609375)

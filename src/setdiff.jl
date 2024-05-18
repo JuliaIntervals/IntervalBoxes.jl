@@ -5,16 +5,16 @@ Computes the set difference x\\y and always returns a tuple of two intervals.
 If the set difference is only one interval or is empty, then the returned tuple contains 1
 or 2 empty intervals.
 """
-function _setdiff(x::Interval{T}, y::Interval{T}) where T
-    intersection = x ∩ y
+function _setdiff(x::BareInterval{T}, y::BareInterval{T}) where T
+    intersection = intersect_interval(x, y)
 
-    isempty(intersection) && return (x, emptyinterval(T))
-    intersection == x && return (emptyinterval(T), emptyinterval(T))  # x is subset of y; setdiff is empty
+    isempty_interval(intersection) && return (x, emptyinterval(x))
+    isequal_interval(intersection, x) && return (emptyinterval(x), emptyinterval(x))  # x is subset of y; setdiff is empty
 
-    x.lo == intersection.lo && return (Interval(intersection.hi, x.hi), emptyinterval(T))
-    x.hi == intersection.hi && return (Interval(x.lo, intersection.lo), emptyinterval(T))
+    inf(x) == inf(intersection) && return (bareinterval(sup(intersection), sup(x)), emptyinterval(x))
+    sup(x) == sup(intersection) && return (bareinterval(inf(x), inf(intersection)), emptyinterval(x))
 
-    return (Interval(x.lo, y.lo), Interval(y.hi, x.hi))
+    return (bareinterval(inf(x), inf(y)), bareinterval(sup(y), sup(x)))
 
 end
 
@@ -33,7 +33,7 @@ function setdiff(A::IntervalBox{N,T}, B::IntervalBox{N,T}) where {N,T}
     intersection = A ∩ B
     isempty(intersection) && return [A]
 
-    result_list = fill(IntervalBox(emptyinterval(T), N), 2*N)
+    result_list = fill(IntervalBox(emptyinterval.(A)), 2 * N)
     offset = 0
     x = A.v
     @inbounds for i = 1:N
@@ -45,5 +45,6 @@ function setdiff(A::IntervalBox{N,T}, B::IntervalBox{N,T}) where {N,T}
         offset += 2
         x = setindex(x, intersection[i], i)
     end
-    filter!(!isempty, result_list)
+
+    return [X for X in result_list if !isempty(X)]
 end

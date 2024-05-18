@@ -4,22 +4,24 @@
 by a Cartesian product of a vector of `N` `Interval`s.
 """
 struct IntervalBox{N,T}
-    v::SVector{N, Interval{T}}
+    v::SVector{N, BareInterval{T}}
 
-    function IntervalBox{N,T}(v::SVector{N, Interval{T}}) where {N,T}
-        if any(isempty_interval, v.data)
-            return new{N,T}(SVector{N, Interval{T}}(ntuple(i -> emptyinterval(T), Val{N})))
+    function IntervalBox{N,T}(v::SVector{N, BareInterval{T}}) where {N,T}
+        if any(isempty_interval, v)
+            return new{N,T}(emptyinterval.(v))
         else
             return new{N,T}(v)
         end
     end
 end
 
-IntervalBox(v::SVector{N, Interval{T}}) where {N,T} = IntervalBox{N,T}(v)
+const IntervalType = Union{Interval, BareInterval}
 
-IntervalBox(x::Interval) = IntervalBox( SVector(x) )  # single interval treated as tuple with one element
+IntervalBox(v::SVector{N, Interval{T}}) where {N,T} = IntervalBox{N,T}(bareinterval.(v))
 
-IntervalBox(x::Interval...) = IntervalBox(SVector(x))
+IntervalBox(x::IntervalType) = IntervalBox( SVector(x) )  # single interval treated as tuple with one element
+
+IntervalBox(x::IntervalType...) = IntervalBox(SVector(x))
 IntervalBox(x::SVector) = IntervalBox(interval.(x))
 IntervalBox(x::Tuple) = IntervalBox(SVector(x))
 IntervalBox(x::Real) = IntervalBox(interval.(x))
@@ -28,14 +30,14 @@ IntervalBox(x::Real) = IntervalBox(interval.(x))
 IntervalBox(X::IntervalBox, n) = foldl(×, Iterators.repeated(X, n))
 
 # construct from two vectors giving bottom and top corners:
-IntervalBox(lo::AbstractVector, hi::AbstractVector) = IntervalBox(force_interval.(lo, hi))
+IntervalBox(lo::AbstractVector, hi::AbstractVector) = IntervalBox(interval.(lo, hi))
 
-IntervalBox(lo::SVector{N,T}, hi::SVector{N,T}) where {N,T} = IntervalBox(force_interval.(lo, hi))
+# IntervalBox(lo::SVector{N,T}, hi::SVector{N,T}) where {N,T} = IntervalBox(interval.(lo, hi))
 
 
 Base.@propagate_inbounds Base.getindex(X::IntervalBox, i) = X.v[i]
 
-setindex(X::IntervalBox, y, i) = IntervalBox( setindex(X.v, y, i) )
+setindex(X::IntervalBox, y, i) = IntervalBox( setindex(X.v, bareinterval(y), i) )
 
 # iteration:
 
@@ -47,10 +49,10 @@ function iterate(X::IntervalBox{N,T}, state) where {N,T}
     return X[state+1], state+1
 end
 
-eltype(::Type{IntervalBox{N,T}}) where {N,T} = Interval{T} # Note that this is defined for the type
+eltype(::Type{IntervalBox{N,T}}) where {N,T} = BareInterval{T} # Note that this is defined for the type
 
 
-Base.eltype(x::IntervalBox{N, T}) where {N, T<:Real} = Interval{T}
+Base.eltype(x::IntervalBox{N, T}) where {N, T<:Real} = BareInterval{T}
 numtype(x::IntervalBox{N, T}) where {N, T<:Real} = T
 
 length(X::IntervalBox{N,T}) where {N,T} = N
@@ -78,15 +80,12 @@ big(X::IntervalBox) = big.(X)
 
 ## set operations
 
-# TODO: Update to use generator
-for (op, dotop) in ((:⊆, :.⊆), (:⊂, :.⊂), (:⊃, :.⊃))
-    @eval $(op)(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} = all($(dotop)(X, Y))
-end
+⊆(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} = all(issubset_interval.(X.v, Y.v))
 
 ∩(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} =
-    IntervalBox(X.v .∩ Y.v)
+    IntervalBox(intersect_interval.(X.v, Y.v))
 ∪(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} =
-    IntervalBox(X.v .∪ Y.v)
+    IntervalBox(hull.(X.v, Y.v))
 
 ∈(X::AbstractVector, Y::IntervalBox{N,T}) where {N,T} = all(X .∈ Y)
 ∈(X, Y::IntervalBox{N,T}) where {N,T} = throw(ArgumentError("$X ∈ $Y is not defined"))
@@ -97,13 +96,8 @@ for op in (:⊆, :⊂, :⊃, :∩, :∪)
     @eval $(op)(X::IntervalBox{1}, a::Interval) = $(op)(first(X), a)
 end
 
-#=
-On Julia 0.6 can now write
-∩{N,T}(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) = IntervalBox(NTuple{N, Interval{Float64}}( (X[i] ∩ Y[i]) for i in 1:N))
-=#
 
-
-isempty(X::IntervalBox) = any(isempty, X.v)
+isempty(X::IntervalBox) = any(isempty_interval, X.v)
 
 diam(X::IntervalBox) = maximum(diam.(X.v))
 
@@ -116,8 +110,10 @@ isinterior(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} = all(isinterio
 contains_zero(X::SVector) = all(contains_zero.(X))
 contains_zero(X::IntervalBox) = all(contains_zero.(X))
 
-×(a::Interval...) = IntervalBox(a...)
-×(a::Interval, b::IntervalBox) = IntervalBox(a, b.v...)
+
+# Cartesian product:
+×(a::IntervalType...) = IntervalBox(a...)
+×(a::IntervalType, b::IntervalBox) = IntervalBox(a, b.v...)
 ×(a::IntervalBox, b::Interval) = IntervalBox(a.v..., b)
 ×(a::IntervalBox, b::IntervalBox) = IntervalBox(a.v..., b.v...)
 
@@ -127,35 +123,35 @@ IntervalBox(x::Interval, n::Int) = IntervalBox(x, Val(n))
 
 dot(x::IntervalBox, y::IntervalBox) = dot(x.v, y.v)
 
-Base.:(==)(x::IntervalBox, y::IntervalBox) = x.v == y.v
+Base.:(==)(x::IntervalBox, y::IntervalBox) = all(isequal_interval.(x.v, y.v))
 
 
-"""
-    mince(x::IntervalBox, n::Int)
+# """
+#     mince(x::IntervalBox, n::Int)
 
-Splits `x` in `n` intervals in each dimension of the same diameter. These
-intervals are combined in all possible `IntervalBox`-es, which are returned
-as a vector.
-"""
-@inline mince(x::IntervalBox{N,T}, n::Int) where {N,T} =
-    mince(x, ntuple(_ -> n, N))
+# Splits `x` in `n` intervals in each dimension of the same diameter. These
+# intervals are combined in all possible `IntervalBox`-es, which are returned
+# as a vector.
+# """
+# @inline mince(x::IntervalBox{N,T}, n::Int) where {N,T} =
+#     mince(x, ntuple(_ -> n, N))
 
-"""
-    mince(x::IntervalBox, ncuts::::NTuple{N,Int})
+# """
+#     mince(x::IntervalBox, ncuts::::NTuple{N,Int})
 
-Splits `x[i]` in `ncuts[i]` intervals . These intervals are
-combined in all possible `IntervalBox`-es, which are returned
-as a vector.
-"""
-@inline function mince(x::IntervalBox{N,T}, ncuts::NTuple{N,Int}) where {N,T}
-    minced_intervals = [mince(x[i], ncuts[i]) for i in 1:N]
-    minced_boxes = Vector{IntervalBox{N,T}}(undef, prod(ncuts))
+# Splits `x[i]` in `ncuts[i]` intervals . These intervals are
+# combined in all possible `IntervalBox`-es, which are returned
+# as a vector.
+# """
+# @inline function mince(x::IntervalBox{N,T}, ncuts::NTuple{N,Int}) where {N,T}
+#     minced_intervals = [mince(x[i], ncuts[i]) for i in 1:N]
+#     minced_boxes = Vector{IntervalBox{N,T}}(undef, prod(ncuts))
 
-    for (k, cut_indices) in enumerate(CartesianIndices(ncuts))
-        minced_boxes[k] = IntervalBox([minced_intervals[i][cut_indices[i]] for i in 1:N])
-    end
-    return minced_boxes
-end
+#     for (k, cut_indices) in enumerate(CartesianIndices(ncuts))
+#         minced_boxes[k] = IntervalBox([minced_intervals[i][cut_indices[i]] for i in 1:N])
+#     end
+#     return minced_boxes
+# end
 
 
 hull(a::IntervalBox{N,T}, b::IntervalBox{N,T}) where {N,T} = IntervalBox(hull.(a[:], b[:]))

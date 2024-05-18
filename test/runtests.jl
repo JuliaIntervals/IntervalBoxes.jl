@@ -2,5 +2,7 @@ using IntervalBoxes
 using Test
 
 @testset "IntervalBoxes.jl" begin
-    # Write your tests here.
+    include("multidim.jl")
+    include("bisect.jl")
+    include("display.jl")
 end

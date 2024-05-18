@@ -14,11 +14,12 @@
 
 /(a::IntervalBox, b::Real) = IntervalBox( a.v ./ b )
 
+Base.:∈(v::AbstractVector, X::IntervalBox) = all(in_interval.(v, X))
 
 # broadcasting:
 
 # wrap decides whether to wrap the result in an IntervalBox or not, based on the return type
-wrap(v::SVector{N,T} where {N,T<:Interval}) = IntervalBox(v)
+wrap(v::SVector{N,T} where {N,T<:IntervalType}) = IntervalBox(v)
 wrap(v) = v
 
 Base.size(X::IntervalBox{2,Float64}) = (2,)
