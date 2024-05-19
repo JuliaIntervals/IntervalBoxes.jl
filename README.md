@@ -50,6 +50,20 @@ true
 Note that the `∪` operator produces the *interval hull* of the union
 (i.e. the smallest interval box that contains the union).
 
+One-dimensional intervals can also be treated as sets in the same way.
+(These operations are deliberately not defined in `IntervalArithmetic.jl`.)
+```
+julia> x = IntervalBox(1..3)
+[1.0, 3.0]¹
+
+julia> y = IntervalBox(2..4)
+[2.0, 4.0]¹
+
+julia> x ∩ y
+[2.0, 3.0]¹
+```
+
+
 ### Range of multi-dimensional functions
 Interval arithmetic allows us to compute an enclosure (in general, an over-estimate)
 of the range of a multi-dimensional function. E.g.:
