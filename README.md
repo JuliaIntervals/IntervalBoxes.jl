@@ -21,7 +21,14 @@ julia> X = IntervalBox(1..3, 4..6)
 
 julia> Y = IntervalBox(2..5, 2)
 [2.0, 5.0]²
+
+julia> (1..3) × (4..6)   # \times<TAB>
+[1.0, 3.0] × [4.0, 6.0]
 ```
+
+We have defined `×` to be the Cartesian cross product operator, acting on `Interval`s and/or
+`IntervalBox`es.
+
 
 ### Set operations
 We treat `IntervalBox`es as sets as much as possible, and extend Julia's set operations
