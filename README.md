@@ -34,7 +34,9 @@ julia> X ∩ Y
 julia> X ∪ Y
 [1.0, 5.0] × [2.0, 6.0]
 
-julia> [2, 5] ∈ X ∩ Y
+julia> using StaticArrays
+
+julia> SVector(2, 5) ∈ X ∩ Y
 true
 ```
 
