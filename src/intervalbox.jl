@@ -3,21 +3,22 @@
 """An `IntervalBox` is an `N`-dimensional rectangular box, given
 by a Cartesian product of a vector of `N` `Interval`s.
 """
-struct IntervalBox{N,T}
-    v::SVector{N, BareInterval{T}}
 
-    function IntervalBox{N,T}(v::SVector{N, BareInterval{T}}) where {N,T}
+const IntervalType{T} = Union{Interval{T}, BareInterval{T}}
+
+struct IntervalBox{N, T, I <: IntervalType{T}}
+    v::SVector{N, I}
+
+    function IntervalBox{N,T,I}(v::SVector{N,I}) where {N, T, I <: IntervalType{T}}
         if any(isempty_interval, v)
-            return new{N,T}(emptyinterval.(v))
+            return new{N,T,I}(emptyinterval.(v))
         else
-            return new{N,T}(v)
+            return new{N,T,I}(v)
         end
     end
 end
 
-const IntervalType = Union{Interval, BareInterval}
-
-IntervalBox(v::SVector{N, Interval{T}}) where {N,T} = IntervalBox{N,T}(bareinterval.(v))
+IntervalBox(v::SVector{N, I}) where {N,T,I <: IntervalType{T}} = IntervalBox{N,T,I}(v)
 
 IntervalBox(x::IntervalType) = IntervalBox( SVector(x) )  # single interval treated as tuple with one element
 
@@ -37,7 +38,7 @@ IntervalBox(lo::AbstractVector, hi::AbstractVector) = IntervalBox(interval.(lo, 
 
 Base.@propagate_inbounds Base.getindex(X::IntervalBox, i) = X.v[i]
 
-setindex(X::IntervalBox, y, i) = IntervalBox( setindex(X.v, bareinterval(y), i) )
+setindex(X::IntervalBox, y, i) = IntervalBox( setindex(X.v, y, i) )
 
 # iteration:
 
@@ -49,13 +50,12 @@ function iterate(X::IntervalBox{N,T}, state) where {N,T}
     return X[state+1], state+1
 end
 
-eltype(::Type{IntervalBox{N,T}}) where {N,T} = BareInterval{T} # Note that this is defined for the type
+eltype(::Type{IntervalBox{N,T,I}}) where {N,T,I} = I
 
+Base.eltype(x::IntervalBox{N,T,I}) where {N,T,I} = I
+numtype(x::IntervalBox{N,T,I}) where {N,T,I} = T
 
-Base.eltype(x::IntervalBox{N, T}) where {N, T<:Real} = BareInterval{T}
-numtype(x::IntervalBox{N, T}) where {N, T<:Real} = T
-
-length(X::IntervalBox{N,T}) where {N,T} = N
+length(X::IntervalBox{N,T,I}) where {N,T,I} = N
 
 
 
@@ -87,7 +87,7 @@ big(X::IntervalBox) = big.(X)
 ∪(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} =
     IntervalBox(hull.(X.v, Y.v))
 
-∈(X::AbstractVector, Y::IntervalBox{N,T}) where {N,T} = all(X .∈ Y)
+∈(X::AbstractVector, Y::IntervalBox{N,T}) where {N,T} = all(in_interval.(X, Y))
 ∈(X, Y::IntervalBox{N,T}) where {N,T} = throw(ArgumentError("$X ∈ $Y is not defined"))
 
 # mixing intervals with one-dimensional interval boxes
