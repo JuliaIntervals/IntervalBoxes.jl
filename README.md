@@ -44,7 +44,7 @@ Note that the `∪` operator produces the *interval hull* of the union
 ### Range of multi-dimensional functions
 Interval arithmetic allows us to compute an enclosure (in general, an over-estimate)
 of the range of a multi-dimensional function. E.g.:
-```
+```jl
 julia> f((x, y)) = x + y;
 
 julia> f(X)
