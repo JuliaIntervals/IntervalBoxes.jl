@@ -11,13 +11,23 @@ An interval box of dimension $n$ thus represents an axis-aligned *set* in Euclid
 
 ## Basic usage
 
+### Constructing `IntervalBox`es
 ```jl
+
+julia> using IntervalBoxes, IntervalArithmetic, IntervalArithmetic.Symbols
+
 julia> X = IntervalBox(1..3, 4..6)
 [1.0, 3.0] × [4.0, 6.0]
 
 julia> Y = IntervalBox(2..5, 2)
 [2.0, 5.0]²
+```
 
+### Set operations
+We treat `IntervalBox`es as sets as much as possible, and extend Julia's set operations
+to act on these objects:
+
+```jl
 julia> X ∩ Y
 [2.0, 3.0] × [4.0, 5.0]
 
@@ -28,11 +38,18 @@ julia> [2, 5] ∈ X ∩ Y
 true
 ```
 
-We treat `IntervalBox`es as sets as much as possible, and extend Julia's set operations
-to act on these objects.
-
 Note that the `∪` operator produces the *interval hull* of the union
 (i.e. the smallest interval box that contains the union).
+
+### Range of multi-dimensional functions
+Interval arithmetic allows us to compute an enclosure (in general, an over-estimate)
+of the range of a multi-dimensional function. E.g.:
+```
+julia> f((x, y)) = x + y;
+
+julia> f(X)
+[5.0, 9.0]
+```
 
 
 ## Authors
