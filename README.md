@@ -3,7 +3,7 @@
 [![Build Status](https://github.com/dpsanders/IntervalBoxes.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/dpsanders/IntervalBoxes.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
 
-## Multi-dimensional interval boxes in Julia.
+## Multi-dimensional interval boxes in Julia
 
 An **interval box** is a Cartesian product of `Interval`s (actually `BareInterval`s), as defined in [IntervalArithmetic.jl](https://github.com/JuliaIntervals/IntervalArithmetic.jl).
 An interval box of dimension $n$ thus represents an axis-aligned *set* in Euclidean space $\mathbb{R}^n$.
