@@ -6,7 +6,7 @@ using StaticArrays
 import IntervalArithmetic: emptyinterval, bisect, diam, hull, mid, mince
 
 import Base:
-    ∩, ∪, +, -, *, /, ==, !=, eltype, length, size, getindex, setindex, iterate,
+    ∩, ∪, ⊆, +, -, *, /, ==, !=, eltype, length, size, getindex, setindex, iterate,
     broadcasted, setdiff, big
 
 export IntervalBox

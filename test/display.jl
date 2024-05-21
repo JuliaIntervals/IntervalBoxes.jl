@@ -1,14 +1,12 @@
 using IntervalArithmetic
 using Test
 
-let x, b
-
 @testset "IntervalBox" begin
 
     setdisplay(:standard, sigfigs=6)
 
     X = IntervalBox(1..2, 3..4)
-    @test typeof(X) == IntervalBox{2,Float64}
+    @test typeof(X) == IntervalBox{2,Float64,Interval{Float64}}
     @test string(X) == "[1.0, 2.0] × [3.0, 4.0]"
 
     s = sprint(show, MIME("text/plain"), X)

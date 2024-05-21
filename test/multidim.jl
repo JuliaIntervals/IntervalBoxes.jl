@@ -1,5 +1,7 @@
-using IntervalArithmetic
+using IntervalArithmetic, IntervalArithmetic.Symbols
 using StaticArrays
+
+dot(x, v) = sum(x .* v)
 
 using Test
 
@@ -9,7 +11,7 @@ using Test
     s = @SVector [1, 2]
 
     @test 2*A == A*2 == IntervalBox(2..4, 6..8)
-    @test typeof(2*A) == IntervalBox{2, Float64}
+    @test typeof(2*A) == IntervalBox{2, Float64, Interval{Float64}}
     @test A + B == IntervalBox(1..4, 6..10)
     @test A + B.v == IntervalBox(1..4, 6..10)
     @test A.v + B == IntervalBox(1..4, 6..10)
@@ -23,15 +25,16 @@ using Test
     @test -A == IntervalBox((-2)..(-1), (-4)..(-3))
     @test 2 - A == IntervalBox(0..1, (-2)..(-1))
     @test B - 2 == IntervalBox((-2)..0, 1..4)
-    @test dot(A, B) == interval(9, 28)
-    @test dot(A, B.v) == interval(9, 28)
-    @test dot(A.v, B) == interval(9, 28)
+    @test isequal_interval(dot(A, B), interval(9, 28))
+    @test isequal_interval(dot(A, B.v), interval(9, 28))
+    @test isequal_interval(dot(A.v, B), interval(9, 28))
     @test A .* B == IntervalBox(0..4, 9..24)
     @test A ./ A == IntervalBox((0.5)..2, (0.75)..(4//3))
     @test 1 ./ B == IntervalBox((0.5)..Inf, (1//6)..(1//3))
     @test B ./ 1 == B
     @test A .^ 2 == IntervalBox(1..4, 9..16)
-    @test sqrt.(B) == IntervalBox(@interval(Float64, 0, sqrt(2)), @interval(Float64, sqrt(3), sqrt(6)))
+    @test sqrt.(B) ==
+        IntervalBox(@interval(Float64, 0, sqrt(2)), @interval(Float64, sqrt(3), sqrt(6)))
 
     for (A, B) in (
                     (A, B),
@@ -99,7 +102,7 @@ using Test
     @test isa(Y, IntervalBox)
     @test length(Y) == 1
     @test Y == IntervalBox( (interval(1., 2.),) )
-    @test typeof(Y) == IntervalBox{1, Float64}
+    @test typeof(Y) == IntervalBox{1, Float64, Interval{Float64}}
 end
 
 @testset "Functions on boxes" begin
@@ -113,42 +116,47 @@ end
 end
 
 
+set_equal(S1, S2) = all(Set(bareinterval.(S1)) .== Set(bareinterval.(S2)))
+
 @testset "setdiff for IntervalBox" begin
     X = IntervalBox(2..4, 3..5)
     Y = IntervalBox(3..5, 4..6)
-    @test Set(setdiff(X, Y)) == Set([ IntervalBox(3..4, 3..4),
-                              IntervalBox(2..3, 3..5) ])
 
-    @test Set(setdiff(X.v, Y)) == Set([ IntervalBox(3..4, 3..4),
-                              IntervalBox(2..3, 3..5) ])
+    result = [ IntervalBox(3..4, 3..4),
+                IntervalBox(2..3, 3..5) ]
 
-    @test Set(setdiff(X, Y.v)) == Set([ IntervalBox(3..4, 3..4),
-                              IntervalBox(2..3, 3..5) ])
+    @test set_equal(setdiff(X, Y), result)
+
+    @test set_equal(setdiff(X.v, Y), result)
+
+    @test set_equal(setdiff(X, Y.v), result)
 
     X = IntervalBox(2..5, 3..6)
     Y = IntervalBox(-10..10, 4..5)
-    @test Set(setdiff(X, Y)) == Set([ IntervalBox(2..5, 3..4),
-                              IntervalBox(2..5, 5..6) ])
+    @test set_equal(setdiff(X, Y), [ IntervalBox(2..5, 3..4),
+                                    IntervalBox(2..5, 5..6) ])
 
 
     X = IntervalBox(2..5, 3..6)
     Y = IntervalBox(4..6, 4..5)
-    @test Set(setdiff(X, Y)) == Set([ IntervalBox(4..5, 3..4),
-                              IntervalBox(4..5, 5..6),
-                              IntervalBox(2..4, 3..6) ])
+    @test set_equal(setdiff(X, Y),
+                    [ IntervalBox(4..5, 3..4),
+                        IntervalBox(4..5, 5..6),
+                        IntervalBox(2..4, 3..6) ])
 
 
     X = IntervalBox(2..5, 3..6)
     Y = IntervalBox(3..4, 4..5)
-    @test Set(setdiff(X, Y)) == Set([ IntervalBox(3..4, 3..4),
-                              IntervalBox(3..4, 5..6),
-                              IntervalBox(2..3, 3..6),
-                              IntervalBox(4..5, 3..6) ])
+    @test set_equal(setdiff(X, Y),
+                    [ IntervalBox(3..4, 3..4),
+                        IntervalBox(3..4, 5..6),
+                        IntervalBox(2..3, 3..6),
+                        IntervalBox(4..5, 3..6) ])
 
 
     X = IntervalBox(2..5, 3..6)
     Y = IntervalBox(2..4, 10..20)
-    @test setdiff(X, Y) == typeof(X)[X]
+    @test setdiff(X, Y) == [X]
 
 
     X = IntervalBox(2..5, 3..6)
@@ -158,20 +166,22 @@ end
 
     X = IntervalBox(1..4, 3..6, 7..10)
     Y = IntervalBox(2..3, 4..5, 8..9)
-    @test Set(setdiff(X, Y)) == Set([ IntervalBox(2..3, 4..5, 7..8),
-                              IntervalBox(2..3, 4..5, 9..10),
-                              IntervalBox(2..3, 3..4, 7..10),
-                              IntervalBox(2..3, 5..6, 7..10),
-                              IntervalBox(1..2, 3..6, 7..10),
-                              IntervalBox(3..4, 3..6, 7..10) ])
+    @test set_equal(setdiff(X, Y),
+                    [ IntervalBox(2..3, 4..5, 7..8),
+                        IntervalBox(2..3, 4..5, 9..10),
+                        IntervalBox(2..3, 3..4, 7..10),
+                        IntervalBox(2..3, 5..6, 7..10),
+                        IntervalBox(1..2, 3..6, 7..10),
+                        IntervalBox(3..4, 3..6, 7..10) ])
 
 
     X = IntervalBox(-Inf..Inf, 1..2)
     Y = IntervalBox(1..2, -1..1.5)
 
-    @test Set(setdiff(X, Y)) == Set([IntervalBox(-Inf..1, 1..2),
-                              IntervalBox(2..Inf, 1..2),
-                              IntervalBox(1..2, 1.5..2)])
+    @test set_equal(setdiff(X, Y),
+                    [IntervalBox(-Inf..1, 1..2),
+                        IntervalBox(2..Inf, 1..2),
+                        IntervalBox(1..2, 1.5..2)])
 end
 
 @testset "mid, diam, × for IntervalBox" begin
@@ -245,7 +255,7 @@ end
     X = IntervalBox(3..4, 5..6)
     Y = collect(X)
     @test all(isequal_interval.(Y, [bareinterval(3, 4), bareinterval(5, 6)]))
-    @test eltype(Y) == BareInterval{Float64}
+    @test eltype(Y) == Interval{Float64}
 end
 
 @testset "Broadcasting" begin
@@ -341,4 +351,4 @@ end
 #     @test symmetric_box(2, Float64) === IntervalBox(-1 .. 1, 2)
 # end
 
-end
+# end
