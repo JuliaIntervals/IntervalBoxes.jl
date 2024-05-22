@@ -8,10 +8,10 @@ using Test
 @testset "Operations on boxes" begin
     A = IntervalBox(1..2, 3..4)
     B = IntervalBox(0..2, 3..6)
-    s = @SVector [1, 2]
+    s = SVector(1.0, 2.0)
 
-    @test 2*A == A*2 == IntervalBox(2..4, 6..8)
-    @test typeof(2*A) == IntervalBox{2, Float64, Interval{Float64}}
+    @test 2 * A == A * 2 == IntervalBox(2..4, 6..8)
+    @test 2 * A isa IntervalBox{2, Float64, Interval{Float64}}
     @test A + B == IntervalBox(1..4, 6..10)
     @test A + B.v == IntervalBox(1..4, 6..10)
     @test A.v + B == IntervalBox(1..4, 6..10)
@@ -45,23 +45,13 @@ using Test
         @test A ⊆ A
         @test A ⊆ B
         @test A.v ⊆ B
-        @test A ⊂ B.v
-        @test !(A ⊂ A)
-        @test A ⊂ B
-        @test A.v ⊂ B
         @test A ⊆ B.v
         @test !(B ⊆ A)
-        @test !(B ⊂ A)
         @test B ⊇ B
         @test B ⊇ A
         @test B.v ⊇ A
         @test B ⊇ A.v
-        @test !(B ⊃ B)
-        @test B ⊃ A
-        @test B.v ⊃ A
-        @test B ⊃ A.v
         @test !(A ⊇ B)
-        @test !(A ⊃ B)
 
         @test A ∩ B == A
         @test A.v ∩ B == A
@@ -85,16 +75,17 @@ using Test
     @test isempty(X ∩ Y)
     @test X ∪ Y == IntervalBox(1..4, 3..4)
 
-    @test !contains_zero(X ∩ Y)
-    @test contains_zero( (-1..1) × (-1..1) )
-    @test !isinf( (-1..1) × (0..Inf) )
-    @test isinf( entireinterval() × entireinterval() )
+    # @test !contains_zero(X ∩ Y)
+    # @test contains_zero( (-1..1) × (-1..1) )
+
+    @test !isbounded( (-1..1) × (0..Inf) )
+    @test !isbounded( entireinterval() × entireinterval() )
 
     X = IntervalBox(2..4, 3..5)
     Y = IntervalBox(3..5, 4..17)
     @test X ∩ Y == IntervalBox(3..4, 4..5)
 
-    v = [@interval(i, i+1) for i in 1:10]
+    v = [interval(i, i+1) for i in 1:10]
     V = IntervalBox(v...)
     @test length(V) == 10
 
@@ -102,21 +93,21 @@ using Test
     @test isa(Y, IntervalBox)
     @test length(Y) == 1
     @test Y == IntervalBox( (interval(1., 2.),) )
-    @test typeof(Y) == IntervalBox{1, Float64, Interval{Float64}}
+    @test Y isa IntervalBox{1, Float64, Interval{Float64}}
 end
 
 @testset "Functions on boxes" begin
     A = IntervalBox(1..2, 3..4)
 
     @test exp.(A) == IntervalBox(exp(A[1]), exp(A[2]))
-    @test typeof(exp.(A)) == IntervalBox{2,Float64}
+    @test exp.(A) isa IntervalBox{2,Float64,Interval{Float64}}
     @test log.(A) == IntervalBox(log(A[1]), log(A[2]))
     @test sqrt.(A) == IntervalBox(sqrt(A[1]), sqrt(A[2]))
     @test inv.(A) == IntervalBox(inv(A[1]), inv(A[2]))
 end
 
 
-set_equal(S1, S2) = all(Set(bareinterval.(S1)) .== Set(bareinterval.(S2)))
+set_equal(S1, S2) = Set(bareinterval.(S1)) == Set(bareinterval.(S2))
 
 @testset "setdiff for IntervalBox" begin
     X = IntervalBox(2..4, 3..5)
@@ -232,8 +223,6 @@ end
     @test IntervalBox( SVector(1, 2, 3.1) ) == IntervalBox(1..1, 2..2, interval(3.1))
     @test IntervalBox( interval.(SVector(1, 2, 3.1)) ) == IntervalBox(1..1, 2..2, interval(3.1))
     @test IntervalBox(3) == IntervalBox(3..3)
-    @test IntervalBox(1:5) == IntervalBox(1..1, 2..2, 3..3, 4..4, 5..5)
-    @test IntervalBox([1:5...]) == IntervalBox(1..1, 2..2, 3..3, 4..4, 5..5)
     @test IntervalBox((1..2) × (2..3), 2) == (1..2) × (2..3) × (1..2) × (2..3)
 
     # construct from corners:
@@ -254,7 +243,7 @@ end
 @testset "Iteration" begin
     X = IntervalBox(3..4, 5..6)
     Y = collect(X)
-    @test all(isequal_interval.(Y, [bareinterval(3, 4), bareinterval(5, 6)]))
+    @test all(isequal_interval.(Y, [interval(3, 4), interval(5, 6)]))
     @test eltype(Y) == Interval{Float64}
 end
 

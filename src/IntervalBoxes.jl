@@ -3,11 +3,13 @@ module IntervalBoxes
 using IntervalArithmetic
 using StaticArrays
 
-import IntervalArithmetic: emptyinterval, bisect, diam, hull, mid, mince
+import IntervalArithmetic:
+    emptyinterval, bisect, diam, hull, mid, mince, bareinterval, isinterior,
+    isbounded
 
 import Base:
     ∩, ∪, ⊆, +, -, *, /, ==, !=, eltype, length, size, getindex, setindex, iterate,
-    broadcasted, setdiff, big
+    broadcasted, setdiff, big, isempty, zero
 
 export IntervalBox
 export ×

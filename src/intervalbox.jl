@@ -97,18 +97,19 @@ big(X::IntervalBox) = big.(X)
 # end
 
 
-isempty(X::IntervalBox) = any(isempty_interval, X.v)
+isempty(X::IntervalBox) = any(isempty_interval, X)
 
-diam(X::IntervalBox) = maximum(diam.(X.v))
+diam(X::IntervalBox) = maximum(diam, X)
 
-emptyinterval(X::IntervalBox{N,T}) where {N,T} = IntervalBox(emptyinterval.(X.v))
+emptyinterval(X::IntervalBox{N,T}) where {N,T} = emptyinterval.(X)
+bareinterval(X::IntervalBox{N,T}) where {N,T} = bareinterval.(X)
 
-isinf(X::IntervalBox) = any(isinf.(X))
+isbounded(X::IntervalBox) = all(isbounded, X)
 
 isinterior(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} = all(isinterior.(X, Y))
 
-contains_zero(X::SVector) = all(contains_zero.(X))
-contains_zero(X::IntervalBox) = all(contains_zero.(X))
+# contains_zero(X::SVector) = 
+# contains_zero(X::IntervalBox) = all(contains_zero.(X))
 
 
 # Cartesian product:
@@ -158,12 +159,11 @@ hull(a::IntervalBox{N,T}, b::IntervalBox{N,T}) where {N,T} = IntervalBox(hull.(a
 hull(a::Vector{IntervalBox{N,T}}) where {N,T} = hull(a...)
 
 """
-    zero(IntervalBox{N, T})
+    zero(::IntervalBox)
 
 Return the zero interval box of dimension `N` in the numeric type `T`.
 """
-zero(::Type{IntervalBox{N, T}}) where {N, T} = IntervalBox(zero(Interval{T}), N)
-zero(x::IntervalBox{N, T}) where {N, T} = zero(typeof(x))
+zero(x::IntervalBox) where {N, T} = zero.(x)
 
 """
     symmetric_box(N, T)
