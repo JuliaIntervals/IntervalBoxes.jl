@@ -53,29 +53,29 @@ using Test
         @test B ⊇ A.v
         @test !(A ⊇ B)
 
-        @test A ∩ B == A
-        @test A.v ∩ B == A
-        @test A ∩ B.v == A
+        @test A ⊓ B == A
+        @test A.v ⊓ B == A
+        @test A ⊓ B.v == A
 
-        @test A ∪ B == B
-        @test A.v ∪ B == B
-        @test A ∪ B.v == B
+        @test A ⊔ B == B
+        @test A.v ⊔ B == B
+        @test A ⊔ B.v == B
     end
 
     x = IntervalBox(0.5..3)
     a = IntervalBox(1..2)
     @test !(x ⊆ a) && a ⊆ x
-    @test x ∩ a == a ∩ x
-    @test x ∪ a == a ∪ x == x
+    @test x ⊓ a == a ⊓ x
+    @test x ⊔ a == a ⊔ x == x
 
 
     X = IntervalBox(1..2, 3..4)
     Y = IntervalBox(3..4, 3..4)
 
-    @test isempty(X ∩ Y)
-    @test X ∪ Y == IntervalBox(1..4, 3..4)
+    @test isempty(X ⊓ Y)
+    @test X ⊔ Y == IntervalBox(1..4, 3..4)
 
-    # @test !contains_zero(X ∩ Y)
+    # @test !contains_zero(X ⊓ Y)
     # @test contains_zero( (-1..1) × (-1..1) )
 
     @test !isbounded( (-1..1) × (0..Inf) )
@@ -83,7 +83,7 @@ using Test
 
     X = IntervalBox(2..4, 3..5)
     Y = IntervalBox(3..5, 4..17)
-    @test X ∩ Y == IntervalBox(3..4, 4..5)
+    @test X ⊓ Y == IntervalBox(3..4, 4..5)
 
     v = [interval(i, i+1) for i in 1:10]
     V = IntervalBox(v...)
