@@ -82,16 +82,16 @@ big(X::IntervalBox) = big.(X)
 
 ⊆(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} = all(issubset_interval.(X, Y))
 
-∩(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} =
+⊓(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} =
     IntervalBox(intersect_interval.(X.v, Y.v))
-∪(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} =
+⊔(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} =
     IntervalBox(hull.(X.v, Y.v))
 
 ∈(X::AbstractVector, Y::IntervalBox{N,T}) where {N,T} = all(in_interval.(X, Y))
 ∈(X, Y::IntervalBox{N,T}) where {N,T} = throw(ArgumentError("$X ∈ $Y is not defined"))
 
 # mixing intervals with one-dimensional interval boxes
-# for op in (:⊆, :⊂, :⊃, :∩, :∪)
+# for op in (:⊆, :⊂, :⊃, :⊓, :⊔)
 #     @eval $(op)(a::Interval, X::IntervalBox{1}) = $(op)(a, first(X))
 #     @eval $(op)(X::IntervalBox{1}, a::Interval) = $(op)(first(X), a)
 # end
@@ -163,7 +163,7 @@ hull(a::Vector{IntervalBox{N,T}}) where {N,T} = hull(a...)
 
 Return the zero interval box of dimension `N` in the numeric type `T`.
 """
-zero(x::IntervalBox) where {N, T} = zero.(x)
+zero(x::IntervalBox) = zero.(x)
 
 """
     symmetric_box(N, T)

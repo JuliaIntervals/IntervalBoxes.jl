@@ -16,6 +16,9 @@
 
 Base.:∈(v::AbstractVector, X::IntervalBox) = all(in_interval.(v, X))
 
+⊓(X::IntervalBox, Y::IntervalBox) = IntervalBox( X.v .⊓ Y.v )
+⊔(X::IntervalBox, Y::IntervalBox) = IntervalBox( X.v .⊔ Y.v )
+
 # broadcasting:
 
 # wrap decides whether to wrap the result in an IntervalBox or not, based on the return type
@@ -32,7 +35,7 @@ Base.size(X::IntervalBox{2,Float64}) = (2,)
 @inline broadcasted(f, x, y, Z::IntervalBox) = wrap(f.(x, y, Z.v))
 @inline broadcasted(f, x, Y::IntervalBox, z) = wrap(f.(x, Y.v, z))
 
-for op in (:+, :-, :∩, :∪, :⊆, :isinterior, :dot, :setdiff, :×)
+for op in (:+, :-, :⊓, :⊔, :⊆, :isinterior, :dot, :setdiff, :×)
     @eval $(op)(a::SVector, b::IntervalBox) = $(op)(IntervalBox(a), b)
     @eval $(op)(a::IntervalBox, b::SVector) = $(op)(a, IntervalBox(b))
 end

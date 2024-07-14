@@ -42,7 +42,7 @@ expand each direction in turn.
 """
 function setdiff(A::IntervalBox{N,T}, B::IntervalBox{N,T}) where {N,T}
 
-    intersection = A ∩ B
+    intersection = A ⊓ B
     isempty(intersection) && return [A]
 
     result_list = fill(emptyinterval.(A), 2 * N)

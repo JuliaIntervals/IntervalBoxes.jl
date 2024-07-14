@@ -35,19 +35,19 @@ We treat `IntervalBox`es as sets as much as possible, and extend Julia's set ope
 to act on these objects:
 
 ```jl
-julia> X ∩ Y
+julia> X ⊓ Y
 [2.0, 3.0]_trv × [4.0, 5.0]_trv
 
-julia> X ∪ Y
+julia> X ⊔ Y
 [1.0, 5.0]_trv × [2.0, 6.0]_trv
 
 julia> using StaticArrays
 
-julia> SVector(2, 5) ∈ X ∩ Y
+julia> SVector(2, 5) ∈ X ⊓ Y
 true
 ```
 
-Note that the `∪` operator produces the *interval hull* of the union
+Note that the `⊔` operator produces the *interval hull* of the union
 (i.e. the smallest interval box that contains the union).
 
 One-dimensional intervals can also be treated as sets in the same way, as follows.
@@ -59,7 +59,7 @@ julia> x = IntervalBox(1..3)
 julia> y = IntervalBox(2..4)
 [2.0, 4.0]¹
 
-julia> x ∩ y
+julia> x ⊓ y
 [2.0, 3.0]¹
 ```
 
