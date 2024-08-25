@@ -115,12 +115,12 @@ isinterior(X::IntervalBox{N,T}, Y::IntervalBox{N,T}) where {N,T} = all(isinterio
 # Cartesian product:
 ×(a::IntervalType...) = IntervalBox(a...)
 ×(a::IntervalType, b::IntervalBox) = IntervalBox(a, b.v...)
-×(a::IntervalBox, b::Interval) = IntervalBox(a.v..., b)
+×(a::IntervalBox, b::IntervalType) = IntervalBox(a.v..., b)
 ×(a::IntervalBox, b::IntervalBox) = IntervalBox(a.v..., b.v...)
 
-IntervalBox(x::Interval, ::Val{n}) where {n} = IntervalBox(SVector(ntuple( _ -> x, Val(n) )))
+IntervalBox(x::IntervalType, ::Val{n}) where {n} = IntervalBox(SVector(ntuple( _ -> x, Val(n) )))
 
-IntervalBox(x::Interval, n::Int) = IntervalBox(x, Val(n))
+IntervalBox(x::IntervalType, n::Int) = IntervalBox(x, Val(n))
 
 dot(x::IntervalBox, y::IntervalBox) = dot(x.v, y.v)
 

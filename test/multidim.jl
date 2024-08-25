@@ -341,3 +341,9 @@ end
 # end
 
 # end
+
+
+@testset "Bare interval boxes" begin
+    x = bareinterval(-1..1)
+    @test IntervalBox(x, 2) == IntervalBox(x, x)
+end
