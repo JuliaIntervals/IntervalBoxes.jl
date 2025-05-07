@@ -1,6 +1,5 @@
 name = "IntervalBoxes"
 uuid = "43d83c95-ebbb-40ec-8188-24586a1458ed"
-authors = ["David Sanders <dpsanders@gmail.com> and contributors"]
 version = "0.2.1"
 
 [deps]
@@ -10,11 +9,4 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 [compat]
 IntervalArithmetic = "^0.22.12"
 StaticArrays = "1"
-
-julia = "1"
-
-[extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[targets]
-test = ["Test"]
+julia = "1.9"
