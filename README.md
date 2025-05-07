@@ -7,7 +7,7 @@ IntervalBoxes
 An **interval box** is a Cartesian product of `Interval`s (or `BareInterval`s), as defined in [IntervalArithmetic.jl](https://github.com/JuliaIntervals/IntervalArithmetic.jl).
 An interval box of dimension $n$ thus represents an axis-aligned *set* in Euclidean space $\mathbb{R}^n$.
 
-## Constructing `IntervalBox`es
+## Constructing a multi-dimensional interval box
 
 ```jl
 julia> using IntervalBoxes, IntervalArithmetic, IntervalArithmetic.Symbols
