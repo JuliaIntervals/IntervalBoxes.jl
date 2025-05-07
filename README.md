@@ -45,9 +45,7 @@ Note that the `⊔` operator produces the *interval hull* of the union (i.e. the
 
 ## Range of multi-dimensional functions
 
-Interval arithmetic allows us to compute an enclosure (in general, an over-estimate) of the range of a multi-dimensional function.
-
-For instance,
+Interval arithmetic allows us to compute an enclosure (in general, an over-estimate) of the range of a multi-dimensional function. E.g.,
 
 ```jl
 julia> f((x, y)) = x + y
@@ -57,9 +55,7 @@ julia> f(X)
 [5.0, 9.0]_com
 ```
 
-Note that in order to mix other types of `Number` with `Interval` in functions like this, the numbers must be wrapped in `ExactReal` to specify that they are exact representations.
-
-Alternatively the complete definition can be annotated with `@exact`:
+Note that in order to mix other types of `Number` with `Interval` in functions like this, the numbers must be wrapped in `ExactReal` to specify that they are exact representations. Alternatively the complete definition can be annotated with `@exact`. E.g.,
 
 ```jl
 julia> g1((x, y)) = ExactReal(2) * x + ExactReal(3) * y
