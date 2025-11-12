@@ -1,12 +1,12 @@
 name = "IntervalBoxes"
 uuid = "43d83c95-ebbb-40ec-8188-24586a1458ed"
-version = "0.2.2"
+version = "0.2.3"
 
 [deps]
 IntervalArithmetic = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
-IntervalArithmetic = "^0.22.12"
+IntervalArithmetic = "0.22.12 - 1"
 StaticArrays = "1"
 julia = "1.9"

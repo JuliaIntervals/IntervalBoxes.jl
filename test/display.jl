@@ -13,7 +13,7 @@ using Test
     @test s == "[1.0, 2.0] × [3.0, 4.0]"
 
     X = bareinterval.(IntervalBox(1.1..1.2, 2.1..2.2))
-    @test string(X) == "[1.09999, 1.20001] × [2.09999, 2.20001]"
+    @test string(X) == "[1.1, 1.2] × [2.1, 2.2]"
 
     X = bareinterval.(IntervalBox(-Inf..Inf, -Inf..Inf))
     @test string(X) == "(-∞, ∞)²"
