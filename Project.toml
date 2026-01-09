@@ -1,6 +1,6 @@
 name = "IntervalBoxes"
 uuid = "43d83c95-ebbb-40ec-8188-24586a1458ed"
-version = "0.2.3"
+version = "0.3.0"
 
 [deps]
 IntervalArithmetic = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
