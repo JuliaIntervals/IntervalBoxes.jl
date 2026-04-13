@@ -8,12 +8,15 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [weakdeps]
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 
 [extensions]
 IntervalBoxesMakieExt = "Makie"
+IntervalBoxesPlotsExt = "RecipesBase"
 
 [compat]
 IntervalArithmetic = "1"
 Makie = "0.21, 0.22"
+RecipesBase = "1"
 StaticArrays = "1"
 julia = "1.10"
