@@ -279,7 +279,7 @@ end
     @test (zero(mid(X)) ∈ X) == false
     @test zero(mid(X)) ∉ X
 
-    @test_throws IntervalArithmetic.InconclusiveBooleanOperation (3..4) ∈ X
+    @test_throws ArgumentError (3..4) ∈ X
 
 end
 
