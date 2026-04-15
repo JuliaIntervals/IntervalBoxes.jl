@@ -14,7 +14,7 @@
 
 /(a::IntervalBox, b::Real) = IntervalBox( a.v ./ b )
 
-Base.:∈(v::AbstractVector, X::IntervalBox) = all(in_interval.(v, X))
+∈(v::AbstractVector, X::IntervalBox) = all(in_interval.(v, X))
 
 ⊓(X::IntervalBox, Y::IntervalBox) = IntervalBox( X.v .⊓ Y.v )
 ⊔(X::IntervalBox, Y::IntervalBox) = IntervalBox( X.v .⊔ Y.v )

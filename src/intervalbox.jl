@@ -87,7 +87,7 @@ big(X::IntervalBox) = big.(X)
 ⊔(X::IntervalBox{N}, Y::IntervalBox{N}) where {N} =
     IntervalBox(hull.(X.v, Y.v))
 
-∈(X::AbstractVector, Y::IntervalBox{N,T}) where {N,T} = all(in_interval.(X, Y))
+∈(X::IntervalType, Y::IntervalBox{N,T}) where {N,T} = throw(ArgumentError("$X ∈ $Y is not defined"))
 ∈(X, Y::IntervalBox{N,T}) where {N,T} = throw(ArgumentError("$X ∈ $Y is not defined"))
 
 # mixing intervals with one-dimensional interval boxes
